@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1b2417">
+  <meta name="description" content="FPS nel browser: difendi il giardino dai droni e dal ruspista impazzito.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <title>Attack on Pennile</title>
+  <script type="module" crossorigin src="./assets/main-Dkh2cacj.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/main-BGpAGNiw.css">
+</head>
+<body data-mode="menu">
+<canvas id="scene" aria-label="3D garden scene"></canvas>
+<div id="hurt"></div>
+<div id="dmgdir"><i></i></div>
+<div id="touchzone"><div id="stick" hidden><div id="knob"></div></div></div>
+
+<div class="hud">
+  <div class="hud-live">
+    <div class="tl">
+      <div class="chip"><span>Wave</span><b id="wave">–</b></div>
+      <div class="chip"><span>Enemies</span><b id="drones">0</b></div>
+      <div class="chip score"><span>Score</span><b id="score">0</b></div>
+      <div class="chip dog"><span>Dog</span><b id="dogstate">Ready</b></div>
+      <div class="chip snipers" id="sniperchip" hidden><span>Snipers</span><b id="sniperstate">0/3</b></div>
+      <div class="chip bbq" id="bbqchip" hidden><span>BBQ</span><b id="bbqstate">Ready</b></div>
+    </div>
+    <div id="bossbar" hidden>
+      <div class="name">The mad digger</div>
+      <div class="bar"><div id="bossfill"></div></div>
+    </div>
+    <div class="crosshair" id="crosshair" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div id="lockmark" aria-hidden="true" hidden></div>
+    <div id="hitmark" aria-hidden="true"></div>
+    <div class="bl">
+      <div class="row">Garden health <b id="hpnum">200</b></div>
+      <div class="bar"><div id="hpfill"></div></div>
+      <div id="heal" hidden></div>
+    </div>
+    <canvas id="minimap" aria-label="Minimap: enemies and fuel cans around you"></canvas>
+    <div class="br">
+      <div class="lbl" id="weaponname">Carbine</div>
+      <div class="ammo"><span id="ammo">24</span><small id="ammomax"> / 24</small></div>
+      <div id="reload" hidden>Reloading</div>
+      <div id="heat" hidden><div class="bar"><div id="heatfill"></div></div><span id="heattext"></span></div>
+      <div id="bladehint" hidden></div>
+      <div id="ride" hidden><div class="bar"><div id="ridefill"></div></div><span id="ridetext"></span></div>
+    </div>
+  </div>
+  <div id="bbqhint" hidden></div>
+  <div id="subtitle" hidden></div>
+  <div id="banner" hidden><div id="banner-title"></div><div id="banner-sub"></div></div>
+</div>
+<div id="feast" hidden aria-live="polite">
+  <div class="bubble"></div>
+  <div class="caption"><b>Flank steak</b><span>The world waits · health back to full</span></div>
+</div>
+
+<button id="actbtn" type="button" hidden>BBQ</button>
+<div class="tbtns">
+  <button id="dogbtn" type="button">Dog</button>
+  <button id="swapbtn" type="button">Swap</button>
+  <button id="reloadbtn" type="button">Rld</button>
+  <button id="jumpbtn" type="button">Jump</button>
+  <button id="firebtn" type="button">Fire</button>
+</div>
+<button id="pausebtn" type="button">Pause</button>
+<div id="layoutbar">
+  <p>Drag the buttons where your thumbs want them</p>
+  <div class="actions"><button class="btn ghost" id="layoutreset" type="button">Reset</button><button class="btn" id="layoutdone" type="button">Done</button></div>
+</div>
+
+<section class="overlay" id="menu">
+  <div class="card">
+    <div class="eyebrow">Rebuilt from 18 photos</div>
+    <h1>Attack on <em>Pennile</em></h1>
+    <p class="lede">Survey drones have found the garden, boar-men are storming the terraces, and a digger driver has lost his mind. Hold the courtyard, the stone steps and the lawn for as many waves as you can.</p>
+    <ul class="keys desk-only">
+      <li class="wide"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</li>
+      <li><kbd>Mouse</kbd> Look</li>
+      <li><kbd>Click</kbd> Fire (hold)</li>
+      <li><kbd>R</kbd> Reload</li>
+      <li><kbd>Space</kbd> Jump</li>
+      <li><kbd>Shift</kbd> Sprint</li>
+      <li><kbd>Esc</kbd> Pause</li>
+      <li class="wide"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> Carbine, Browning, dagger, saber</li>
+      <li><kbd>E</kbd> Dog: at the enemy in sight</li>
+      <li><kbd>F3</kbd> Stats</li>
+    </ul>
+    <p class="lede touch-only">Left thumb moves, right thumb looks. Fire, jump and reload buttons sit on the right; drag on Fire to aim while shooting, Swap changes weapon, Dog sends the dog at the enemy in your sights, and Button layout moves the buttons anywhere. With gyro aim on, turn or tilt the phone to aim.</p>
+    <div class="settings">
+      <label for="map">Map</label>
+      <select id="map"><option value="pennile">Pennile</option><option value="m">M</option></select>
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty"><option value="facile">Easy</option><option value="difficile">Hard</option></select>
+      <label for="quality">Quality</label>
+      <select id="quality"><option value="basso">Low</option><option value="medio">Medium</option><option value="alto">High</option></select>
+      <label for="sens">Mouse sensitivity</label>
+      <input id="sens" type="range" min="0.4" max="2.5" step="0.1" value="1">
+      <label for="bob">Head bob</label>
+      <select id="bob"><option value="1">On</option><option value="0">Off</option></select>
+      <label for="gyro" class="touch-only">Gyro aim</label>
+      <select id="gyro" class="touch-only"><option value="1">On</option><option value="0">Off</option></select>
+      <label for="gyrogain" class="touch-only">Gyro sensitivity</label>
+      <input id="gyrogain" class="touch-only" type="range" min="1" max="6" step="0.5" value="4">
+      <label for="layoutedit" class="touch-only">Button layout</label>
+      <button id="layoutedit" class="btn ghost touch-only" type="button">Move buttons</button>
+      <label for="resumemode">After defeat</label>
+      <select id="resumemode"><option value="1">Resume from that wave</option><option value="0">Start over from wave 1</option></select>
+    </div>
+    <p id="gyrostatus" class="note touch-only">Motion sensor: no data yet</p>
+    <p id="loading">Loading the garden…</p>
+    <div class="actions">
+      <button class="btn" id="continue" type="button" hidden>Resume</button>
+      <button class="btn" id="start" type="button" disabled>Start defending</button>
+      <button class="btn ghost" id="mute" type="button" aria-pressed="false">Sound on</button>
+    </div>
+    <p class="note desk-only">The mouse gets captured for aiming. If your browser won't allow that, drag to look and click to fire.</p>
+  </div>
+</section>
+
+<section class="overlay" id="pause" hidden>
+  <div class="card">
+    <div class="eyebrow">Paused</div>
+    <h2>The drones are waiting.</h2>
+    <div class="actions"><button class="btn" id="resume" type="button">Resume</button><button class="btn ghost" id="quit" type="button">Main menu</button></div>
+  </div>
+</section>
+
+<section class="overlay" id="over" hidden>
+  <div class="card">
+    <div class="eyebrow">Garden overrun</div>
+    <h2>They took the lawn on wave <span id="over-wave">1</span>.</h2>
+    <div class="stats">
+      <div><span>Score</span><b id="over-score">0</b></div>
+      <div><span>Enemies down</span><b id="over-kills">0</b></div>
+      <div><span>Accuracy</span><b id="over-acc">0%</b></div>
+    </div>
+    <div class="actions"><button class="btn" id="again" type="button">Play again</button><button class="btn ghost" id="newgame" type="button" hidden>New game</button><span id="over-best"></span></div>
+  </div>
+</section>
+</body>
+</html>
